@@ -3,6 +3,21 @@ namespace Internship_3_OOP_Calendar
 {
     public class Program
     {
+        static List<Event> FilterEvents(List<Event> events, Predicate<Event> predicate)
+        {
+            var queried = from e in events
+                          where predicate(e)
+                          select e;
+            return queried.ToList();
+        }
+        static List<Event> PastEvents(List<Event> events) => FilterEvents(events, (e) => e.EndDateTime < DateTime.UtcNow);
+        static List<Event> FutureEvents(List<Event> events) => FilterEvents(events, (e) => e.StartDateTime > DateTime.UtcNow);
+        static List<Event> ActiveEvents(List<Event> events) => FilterEvents(events, (e) => 
+        {
+            return e.StartDateTime < DateTime.UtcNow && e.EndDateTime > DateTime.UtcNow;
+        }
+        );
+
         static void Main()
         {
             #region Predefined data
