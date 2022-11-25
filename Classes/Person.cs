@@ -1,5 +1,8 @@
 ﻿namespace Internship_3_OOP_Calendar.Classes
 {
+    /// <summary>
+    /// Defines a person within the calendar.
+    /// </summary>
     public class Person
     {
         #region Fields
