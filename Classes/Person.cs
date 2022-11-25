@@ -63,6 +63,19 @@
             }
             _eventAttendance[eventId] = false;
         }
+        /// <summary>
+        /// Checks wether the person attended the given event.
+        /// </summary>
+        /// <param name="eventId">Event to check.</param>
+        /// <returns>Boolean indicating wether the person attended.</returns>
+        public bool CheckAttended(Guid eventId)
+        {
+            if (!_eventAttendance.ContainsKey(eventId))
+            {
+                return false;
+            }
+            return _eventAttendance[eventId];
+        }
         #endregion
     }
 }

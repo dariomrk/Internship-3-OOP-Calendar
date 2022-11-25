@@ -11,12 +11,85 @@ namespace Internship_3_OOP_Calendar
             return queried.ToList();
         }
         static List<Event> PastEvents(List<Event> events) => FilterEvents(events, (e) => e.EndDateTime < DateTime.UtcNow);
-        static List<Event> FutureEvents(List<Event> events) => FilterEvents(events, (e) => e.StartDateTime > DateTime.UtcNow);
+        static List<Event> UpcomingEvents(List<Event> events) => FilterEvents(events, (e) => e.StartDateTime > DateTime.UtcNow);
         static List<Event> ActiveEvents(List<Event> events) => FilterEvents(events, (e) => 
         {
             return e.StartDateTime < DateTime.UtcNow && e.EndDateTime > DateTime.UtcNow;
         }
         );
+
+        static void Spacer()
+        {
+            Console.WriteLine(
+                "-----------------------------------------------------------------------------------"
+                );
+        }
+        static void WriteEvents(List<Event> events, List<Person> people, Action<Event,List<Person>> writeStyle)
+        {
+            foreach (var e in events)
+            {
+                writeStyle(e,people);
+            }
+        }
+        static void WriteStyleActive(Event e, List<Person> people)
+        {
+            Spacer();
+            Console.WriteLine(
+                $"Id: {e.Id}\n" +
+                $"Title: {e.Title} - Location: {e.Location} - " +
+                $"Ends in: {(e.EndDateTime - DateTime.UtcNow).ToString("HH:mm")}\n" +
+                $"Atendees: "
+                );
+            foreach(var person in people)
+            {
+                if (e.CheckIsInvited(person.Email))
+                    Console.WriteLine($"\t • {person.FirstName} {person.LastName} : {person.Email}");
+            }
+            Spacer();
+        }
+        static void WriteStyleUpcoming(Event e, List<Person> people)
+        {
+            Spacer();
+            Console.WriteLine(
+                $"Id: {e.Id}\n" +
+                $"Title: {e.Title} - Location: {e.Location} - " +
+                $"Starts in {(e.StartDateTime - DateTime.UtcNow).ToString("dd")} days - " +
+                $"Length: {(e.EndDateTime - e.EndDateTime).ToString("HH:mm")}\n" +
+                $"Atendees: "
+                );
+            foreach (var person in people)
+            {
+                if (e.CheckIsInvited(person.Email))
+                    Console.WriteLine($"\t • {person.FirstName} {person.LastName} : {person.Email}");
+            }
+            Spacer();
+        }
+        static void WriteStylePast(Event e, List<Person> people)
+        {
+            Spacer();
+            Console.WriteLine(
+                $"Title: {e.Title} - Location: {e.Location} - " +
+                $"Ended {(DateTime.UtcNow - e.EndDateTime).ToString("dd")} days ago - " +
+                $"Length: {(e.EndDateTime - e.EndDateTime).ToString("HH:mm")}\n" +
+                $"Atendees:"
+                );
+            foreach (var person in people)
+            {
+                if (!e.CheckIsInvited(person.Email))
+                    continue;
+                if (person.CheckAttended(e.Id))
+                    Console.WriteLine($"\t ✔ {person.FirstName} {person.LastName} : {person.Email}");
+            }
+            Console.WriteLine("Non atendees:");
+            foreach (var person in people)
+            {
+                if (!e.CheckIsInvited(person.Email))
+                    continue;
+                if (!person.CheckAttended(e.Id))
+                    Console.WriteLine($"\t ❌ {person.FirstName} {person.LastName} : {person.Email}");
+            }
+            Spacer();
+        }
 
         static void Main()
         {
