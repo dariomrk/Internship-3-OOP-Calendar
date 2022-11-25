@@ -3,6 +3,7 @@ namespace Internship_3_OOP_Calendar
 {
     public class Program
     {
+        #region Filter Functions
         static List<Event> FilterEvents(List<Event> events, Predicate<Event> predicate)
         {
             var queried = from e in events
@@ -17,7 +18,9 @@ namespace Internship_3_OOP_Calendar
             return e.StartDateTime < DateTime.UtcNow && e.EndDateTime > DateTime.UtcNow;
         }
         );
+        #endregion
 
+        #region UI utility functions
         static void Spacer()
         {
             Console.WriteLine(
@@ -90,6 +93,7 @@ namespace Internship_3_OOP_Calendar
             }
             Spacer();
         }
+        #endregion
 
         static void Main()
         {
@@ -99,37 +103,79 @@ namespace Internship_3_OOP_Calendar
                 new Event("DUMP DESIGN #1",
                 "FESB",
                 DateTime.Parse("22 Nov 2022 14:00:00 GMT"),
-                DateTime.Parse("22 Nov 2022 16:00:00 GMT")
+                DateTime.Parse("22 Nov 2022 16:00:00 GMT"),
+                new List<string>()
+                {
+                    "eldred.moor2@hotmail.com",
+                    "eunice2017@gmail.com",
+                    "kennedi_kli@gmail.com",
+                }
                 ),
 
                 new Event("DUMP DEV #1",
                 "FESB",
                 DateTime.Parse("22 Nov 2022 17:00:00 GMT"),
-                DateTime.Parse("22 Nov 2022 19:00:00 GMT")
+                DateTime.Parse("22 Nov 2022 19:00:00 GMT"),
+                new List<string>()
+                {
+                    "margarett9@yahoo.com",
+                    "mattie_watsi@gmail.com",
+                    "leann1977@yahoo.com",
+                    "kennedi_kli@gmail.com",
+                    "eldred.moor2@hotmail.com",
+                }
                 ),
 
                 new Event("DUMP DEV #2",
                 "Dom mladih",
                 DateTime.Parse("26 Nov 2022 17:00:00 GMT"),
-                DateTime.Parse("26 Nov 2022 19:00:00 GMT")
+                DateTime.Parse("26 Nov 2022 19:00:00 GMT"),
+                new List<string>()
+                {
+                    "margarett9@yahoo.com",
+                    "mattie_watsi@gmail.com",
+                    "leann1977@yahoo.com",
+                    "kennedi_kli@gmail.com",
+                    "eldred.moor2@hotmail.com",
+                }
                 ),
 
                 new Event("DUMP DESIGN #2",
                 "Dom mladih",
                 DateTime.Parse("26 Nov 2022 19:00:00 GMT"),
-                DateTime.Parse("26 Nov 2022 21:00:00 GMT")
+                DateTime.Parse("26 Nov 2022 21:00:00 GMT"),
+                new List<string>()
+                {
+                    "eldred.moor2@hotmail.com",
+                    "eunice2017@gmail.com",
+                    "kennedi_kli@gmail.com",
+                }
                 ),
 
                 new Event("DUMP DEV #3",
                 "Dom mladih",
                 DateTime.Parse("10 Dec 2022 17:00:00 GMT"),
-                DateTime.Parse("10 Dec 2022 19:00:00 GMT")
+                DateTime.Parse("10 Dec 2022 19:00:00 GMT"),
+                new List<string>()
+                {
+                    "margarett9@yahoo.com",
+                    "mattie_watsi@gmail.com",
+                    "leann1977@yahoo.com",
+                    "kennedi_kli@gmail.com",
+                    "eldred.moor2@hotmail.com",
+                }
                 ),
 
                 new Event("DUMP DESIGN #3",
                 "FESB",
                 DateTime.Parse("11 Dec 2022 11:00:00 GMT"),
-                DateTime.Parse("11 Dec 2022 13:00:00 GMT")
+                DateTime.Parse("11 Dec 2022 13:00:00 GMT"),
+                new List<string>()
+                {
+                    "eldred.moor2@hotmail.com",
+                    "eunice2017@gmail.com",
+                    "kennedi_kli@gmail.com",
+                }
                 ),
             };
             List<Person> people = new()
