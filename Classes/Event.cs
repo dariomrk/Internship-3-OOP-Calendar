@@ -7,7 +7,7 @@
     {
         #region Fields
         public readonly Guid Id = Guid.NewGuid();
-        private readonly List<string> _invited = new();
+        private readonly List<string> _invited;
         private string _title;
         private string _location;
         private DateTime _startDateTime = DateTime.MinValue;
@@ -63,6 +63,15 @@
             Location = location;
             StartDateTime = startAt;
             EndDateTime = endAt;
+            _invited = new List<string>();
+        }
+        public Event(string title, string location, DateTime startAt, DateTime endAt, List<string> invited)
+        {
+            Title = title;
+            Location = location;
+            StartDateTime = startAt;
+            EndDateTime = endAt;
+            _invited = invited;
         }
         #endregion
 
