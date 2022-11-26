@@ -137,6 +137,28 @@ namespace Internship_3_OOP_Calendar
                 return parsedInput;
             }
         }
+        static bool GetConfirmation(string question)
+        {
+            while (true)
+            {
+                Console.WriteLine(question);
+                Console.Write("Are you sure? Y/N: ");
+                string answer = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(answer))
+                {
+                    WriteWarning("Please input Y or N!");
+                    continue;
+                }
+                if (answer.ToLower() == "y")
+                {
+                    return true;
+                }
+                if (answer.ToLower() == "n")
+                {
+                    return false;
+                }
+            }
+        }
         #endregion
 
         #region Data handling functions
@@ -160,13 +182,30 @@ namespace Internship_3_OOP_Calendar
             }
             return false;
         }
+        static bool TryGetEvent(string stringId, List<Event> events, out Event output)
+        {
+            output = null;
+            if (!Guid.TryParse(stringId, out Guid id))
+            {
+                return false;
+            }
+            foreach (var e in events)
+            {
+                if (e.Id == id)
+                {
+                    output = e;
+                    return true;
+                }
+            }
+            return false;
+        }
         /// <summary>
         /// Sets the person as missing from an event.
         /// </summary>
         /// <param name="id">Event id.</param>
         /// <param name="people">Collection of all people.</param>
         /// <param name="emails">Emails of people that missed a given event.</param>
-        static void MarkAsMissing(Guid id,List<Event> events, List<Person> people, string[] emails)
+        static void MarkAsMissing(Guid id, List<Event> events, List<Person> people, string[] emails)
         {
             TryGetEvent(id, events, out Event e);
 
@@ -182,9 +221,30 @@ namespace Internship_3_OOP_Calendar
                         person.Missed(id);
                     }
                 }
-            foreach(var person in people)
+            foreach (var person in people)
             {
-                if(emails.Contains(person.Email) && !invited.Contains(person.Email))
+                if (emails.Contains(person.Email) && !invited.Contains(person.Email))
+                {
+                    Console.WriteLine($"\t{person.Email} is not on the list of invited people!");
+                }
+            }
+        }
+        static void RemoveInvited(Guid id, List<Event> events, List<Person> people, string[] emails)
+        {
+            TryGetEvent(id, events, out Event e);
+
+            var toRemove = from i in e.Invited
+                          where emails.Contains(i)
+                          select i;
+
+            foreach (var i in toRemove)
+            {
+                e.RemoveInvited(i);
+            }
+
+            foreach (var person in people)
+            {
+                if (emails.Contains(person.Email) && !toRemove.Contains(person.Email))
                 {
                     Console.WriteLine($"\t{person.Email} is not on the list of invited people!");
                 }
@@ -324,7 +384,6 @@ namespace Internship_3_OOP_Calendar
                     case 1:
                         {
                             #region Active Events
-                            active:
                             Console.Clear();
                             WriteEvents(ActiveEvents(events), people, WriteStyleActive);
                             string[] activeEventsOptions =
@@ -342,11 +401,12 @@ namespace Internship_3_OOP_Calendar
                                 case 1:
                                     {
                                         Console.Write("Input event id: ");
-                                        if(!Guid.TryParse(Console.ReadLine(),out Guid id)){
+                                        if (!Guid.TryParse(Console.ReadLine(), out Guid id))
+                                        {
                                             WriteWarning("Invalid id format!");
                                             break;
                                         }
-                                        if(!TryGetEvent(id,events,out _))
+                                        if (!TryGetEvent(id, events, out _))
                                         {
                                             WriteWarning("Event with given id does not exist!");
                                             break;
@@ -355,7 +415,7 @@ namespace Internship_3_OOP_Calendar
                                             " separated with whitespace.");
                                         Console.Write("Input here: ");
                                         string[] emails = (Console.ReadLine().Split(' '));
-                                        MarkAsMissing(id,events,people,emails);
+                                        MarkAsMissing(id, events, people, emails);
                                         WaitForUser();
                                         break;
                                     }
@@ -383,12 +443,64 @@ namespace Internship_3_OOP_Calendar
                                     }
                                 case 1:
                                     {
-                                        // TODO submenu option
+                                        Console.Write("Input the id of the event you want to delete: ");
+                                        if (!TryGetEvent(Console.ReadLine(), events, out Event e))
+                                        {
+                                            WriteWarning("Event with given id does not exist!");
+                                            break;
+                                        }
+
+                                        var upcomingEvents = UpcomingEvents(events);
+                                        if (!upcomingEvents.Contains(e))
+                                        {
+                                            WriteWarning("Cannot delete a past event!");
+                                            break;
+                                        }
+
+                                        bool confirm = GetConfirmation($"Are you sure you want to delete: {e.Title}?");
+
+                                        if (confirm)
+                                        {
+                                            WriteWarning("Deleted!");
+                                            events.Remove(e);
+                                            break;
+                                        }
+                                        WriteWarning("Aborted!");
                                         break;
                                     }
                                 case 2:
                                     {
-                                        // TODO submenu option
+                                        Console.Write("Input event id: ");
+                                        if (!Guid.TryParse(Console.ReadLine(), out Guid id))
+                                        {
+                                            WriteWarning("Invalid id format!");
+                                            break;
+                                        }
+                                        if (!TryGetEvent(id, events, out Event e))
+                                        {
+                                            WriteWarning("Event with given id does not exist!");
+                                            break;
+                                        }
+                                        var upcomingEvents = UpcomingEvents(events);
+                                        if (!upcomingEvents.Contains(e))
+                                        {
+                                            WriteWarning("Cannot delete participants of a past event!");
+                                            break;
+                                        }
+
+                                        bool confirm = GetConfirmation($"Are you sure you want to remove people from: {e.Title}?");
+
+                                        if (confirm)
+                                        {
+                                            Console.WriteLine("Input emails of people to remove as invited from event," +
+                                           " separated with whitespace.");
+                                            Console.Write("Input here: ");
+                                            string[] emails = (Console.ReadLine().Split(' '));
+                                            RemoveInvited(e.Id, events, people, emails);
+                                            WriteWarning("Deleted!");
+                                            break;
+                                        }
+                                        WaitForUser();
                                         break;
                                     }
                             }

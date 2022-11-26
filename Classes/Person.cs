@@ -100,6 +100,13 @@
         {
             return _eventAttendance.ContainsKey(eventId);
         }
+        public void RemoveEventInfo(Guid eventId)
+        {
+            if (_eventAttendance.ContainsKey(eventId))
+            {
+                _eventAttendance.Remove(eventId);
+            }
+        }
         #endregion
     }
 }
