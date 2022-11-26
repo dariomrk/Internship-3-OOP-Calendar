@@ -29,13 +29,22 @@
                 _title = value;
             }
         }
-        public string Location { get => _location; set => _location = value; }
+        public string Location
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(_location))
+                    return "No location set";
+                return _location;
+            } 
+            set => _location = value;
+        }
         public DateTime StartDateTime
         {
             get => _startDateTime;
             set
             {
-                if(value > _endDateTime)
+                if (value > _endDateTime)
                 {
                     throw new InvalidOperationException("Start DateTime must be before end DateTime");
                 }
@@ -51,7 +60,7 @@
                 {
                     throw new InvalidOperationException("End DateTime must be after start DateTime");
                 }
-                _startDateTime = value;
+                _endDateTime = value;
             }
         }
         #endregion
@@ -84,8 +93,8 @@
         public bool CheckIsInvited(string email)
         {
             var query = from invite in _invited
-                            where email == invite
-                            select invite;
+                        where email == invite
+                        select invite;
             return query.Any();
         }
         /// <summary>

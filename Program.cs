@@ -13,7 +13,7 @@ namespace Internship_3_OOP_Calendar
         }
         static List<Event> PastEvents(List<Event> events) => FilterEvents(events, (e) => e.EndDateTime < DateTime.UtcNow);
         static List<Event> UpcomingEvents(List<Event> events) => FilterEvents(events, (e) => e.StartDateTime > DateTime.UtcNow);
-        static List<Event> ActiveEvents(List<Event> events) => FilterEvents(events, (e) => 
+        static List<Event> ActiveEvents(List<Event> events) => FilterEvents(events, (e) =>
         {
             return e.StartDateTime < DateTime.UtcNow && e.EndDateTime > DateTime.UtcNow;
         }
@@ -27,37 +27,38 @@ namespace Internship_3_OOP_Calendar
                 "-----------------------------------------------------------------------------------"
                 );
         }
-        static void WriteEvents(List<Event> events, List<Person> people, Action<Event,List<Person>> writeStyle)
+        static void WriteEvents(List<Event> events, List<Person> people, Action<Event, List<Person>> writeStyle)
         {
             foreach (var e in events)
             {
-                writeStyle(e,people);
+                writeStyle(e, people);
             }
         }
         static void WriteStyleActive(Event e, List<Person> people)
         {
+            TimeSpan ts = e.EndDateTime - DateTime.UtcNow;
             Spacer();
             Console.WriteLine(
                 $"Id: {e.Id}\n" +
                 $"Title: {e.Title} - Location: {e.Location} - " +
-                $"Ends in: {(e.EndDateTime - DateTime.UtcNow).ToString("HH:mm")}\n" +
-                $"Atendees: "
+                $"Ends in: {ts.ToString("%hh")}h {ts.ToString("%m")}min\n" +
+                $"Invited: "
                 );
-            foreach(var person in people)
+            foreach (var person in people)
             {
                 if (e.CheckIsInvited(person.Email))
                     Console.WriteLine($"\t • {person.FirstName} {person.LastName} : {person.Email}");
             }
-            Spacer();
         }
         static void WriteStyleUpcoming(Event e, List<Person> people)
         {
+            TimeSpan ts = e.EndDateTime - e.EndDateTime;
             Spacer();
             Console.WriteLine(
                 $"Id: {e.Id}\n" +
                 $"Title: {e.Title} - Location: {e.Location} - " +
                 $"Starts in {(e.StartDateTime - DateTime.UtcNow).ToString("dd")} days - " +
-                $"Length: {(e.EndDateTime - e.EndDateTime).ToString("HH:mm")}\n" +
+                $"Length: {ts.ToString("%hh")}h {ts.ToString("%m")}min\n" +
                 $"Atendees: "
                 );
             foreach (var person in people)
@@ -65,15 +66,16 @@ namespace Internship_3_OOP_Calendar
                 if (e.CheckIsInvited(person.Email))
                     Console.WriteLine($"\t • {person.FirstName} {person.LastName} : {person.Email}");
             }
-            Spacer();
         }
         static void WriteStylePast(Event e, List<Person> people)
         {
+            TimeSpan tsLength = e.EndDateTime - e.StartDateTime;
+            TimeSpan tsAgo = DateTime.UtcNow - e.EndDateTime;
             Spacer();
             Console.WriteLine(
                 $"Title: {e.Title} - Location: {e.Location} - " +
-                $"Ended {(DateTime.UtcNow - e.EndDateTime).ToString("dd")} days ago - " +
-                $"Length: {(e.EndDateTime - e.EndDateTime).ToString("HH:mm")}\n" +
+                $"Ended {tsAgo.ToString("%d")} days ago - " +
+                $"Length: {tsLength.ToString("%hh")}h {tsLength.ToString("%m")}min\n" +
                 $"Atendees:"
                 );
             foreach (var person in people)
@@ -91,7 +93,41 @@ namespace Internship_3_OOP_Calendar
                 if (!person.CheckAttended(e.Id))
                     Console.WriteLine($"\t ❌ {person.FirstName} {person.LastName} : {person.Email}");
             }
-            Spacer();
+        }
+
+        static void WaitForUser()
+        {
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+        }
+        static void WriteWarning(string warning)
+        {
+            Console.WriteLine(warning);
+            WaitForUser();
+        }
+        static int WriteOptions(string[] options)
+        {
+            while (true)
+            {
+                Console.WriteLine("Available options:");
+                for (int i = 0; i < options.Length; i++)
+                {
+                    Console.WriteLine($"{i} - {options[i]}");
+                }
+                Console.Write("Input: ");
+                string? userInput = Console.ReadLine();
+                if (!int.TryParse(userInput, out int parsedInput))
+                {
+                    WriteWarning("Please input a valid option!");
+                    continue;
+                }
+                if (parsedInput < 0 || parsedInput > options.Length -1)
+                {
+                    WriteWarning("Please input a valid option!");
+                    continue;
+                }
+                return parsedInput;
+            }
         }
         #endregion
 
@@ -100,6 +136,17 @@ namespace Internship_3_OOP_Calendar
             #region Predefined data
             List<Event> events = new()
             {
+                new Event("Fake event #0",
+                "",
+                DateTime.UtcNow,
+                DateTime.UtcNow.AddHours(1),
+                new List<string>()
+                {
+                    "eldred.moor2@hotmail.com",
+                    "eunice2017@gmail.com",
+                    "kennedi_kli@gmail.com",
+                }
+                ),
                 new Event("DUMP DESIGN #1",
                 "FESB",
                 DateTime.Parse("22 Nov 2022 14:00:00 GMT"),
@@ -191,9 +238,72 @@ namespace Internship_3_OOP_Calendar
                 new Person("Miguel","Booher","kurt_ko1971@hotmail.com"),
                 new Person("Terry","Martin","margarett9@yahoo.com")
             };
-            #endregion
+            #endregion 
 
+            while (true)
+            {
+                string[] options =
+                {
+                    "Close the program",
+                    "Currently active events",
+                    "Upcoming events",
+                    "Past events",
+                    "Create event",
+                };
 
+                Console.Clear();
+                int option = WriteOptions(options);
+
+                Console.Clear();
+                switch (option)
+                {
+                    case 0:
+                        {
+                            return;
+                        }
+                    case 1:
+                        {
+                            #region Active Events
+                            Console.Clear();
+                            WriteEvents(ActiveEvents(events), people, WriteStyleActive);
+                            string[] activeEventsOptions =
+                            {
+                                    "Return to main menu",
+                                    "Mark as missing",
+                                };
+                            int submenuOption = WriteOptions(activeEventsOptions);
+                            switch (submenuOption)
+                            {
+                                case 0:
+                                    {
+                                        break;
+                                    }
+                                case 1:
+                                    {
+                                        // TODO Mark as missing submenu option
+                                        break;
+                                    }
+                            }
+                        }
+                        break;
+                    #endregion
+                    case 2:
+                        {
+
+                            break;
+                        }
+                    case 3:
+                        {
+
+                            break;
+                        }
+                    case 4:
+                        {
+
+                            break;
+                        }
+                }
+            }
         }
     }
 }
