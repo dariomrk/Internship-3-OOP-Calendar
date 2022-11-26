@@ -33,6 +33,21 @@
             _firstName = firstName;
             _lastName = lastName;
             _email = email;
+            _eventAttendance = new();
+        }
+        public Person(string firstName, string lastName, string email, Dictionary<Guid,bool> eventAttendance)
+        {
+            if (string.IsNullOrWhiteSpace(firstName))
+                throw new ArgumentException();
+            if (string.IsNullOrWhiteSpace(lastName))
+                throw new ArgumentException();
+            if (!Classes.Email.Validate(email))
+                throw new ArgumentException("Email is not valid!");
+
+            _firstName = firstName;
+            _lastName = lastName;
+            _email = email;
+            _eventAttendance = eventAttendance;
         }
         #endregion
 
