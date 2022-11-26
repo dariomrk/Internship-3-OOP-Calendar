@@ -91,6 +91,15 @@
             }
             return _eventAttendance[eventId];
         }
+        /// <summary>
+        /// Checks wether the attendance is set for a given event.
+        /// </summary>
+        /// <param name="eventId">Event to check.</param>
+        /// <returns>Boolean indicating wether the attendance is set as attended / missing.</returns>
+        public bool AttendanceSet(Guid eventId)
+        {
+            return _eventAttendance.ContainsKey(eventId);
+        }
         #endregion
     }
 }

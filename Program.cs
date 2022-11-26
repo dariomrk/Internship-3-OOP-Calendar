@@ -3,7 +3,7 @@ namespace Internship_3_OOP_Calendar
 {
     public class Program
     {
-        #region Filter Functions
+        #region Filter functions
         static List<Event> FilterEvents(List<Event> events, Predicate<Event> predicate)
         {
             var queried = from e in events
@@ -33,6 +33,7 @@ namespace Internship_3_OOP_Calendar
             {
                 writeStyle(e, people);
             }
+            Spacer();
         }
         static void WriteStyleActive(Event e, List<Person> people)
         {
@@ -46,8 +47,12 @@ namespace Internship_3_OOP_Calendar
                 );
             foreach (var person in people)
             {
+                if (!person.AttendanceSet(e.Id))
+                    person.Attended(e.Id);
                 if (e.CheckIsInvited(person.Email))
+                {
                     Console.WriteLine($"\t{person.FirstName} {person.LastName} : {person.Email}");
+                }
             }
         }
         static void WriteStyleUpcoming(Event e, List<Person> people)
@@ -60,7 +65,7 @@ namespace Internship_3_OOP_Calendar
                 $"Title: {e.Title} - Location: {e.Location} - " +
                 $"Starts in {tsUntill.ToString("dd")} days {tsUntill.ToString("%h")}h - " +
                 $"Length: {tsLength.ToString("%h")}h {tsLength.ToString("%m")}min\n" +
-                $"Atendees:"
+                $"Invited:"
                 );
             foreach (var person in people)
             {
@@ -78,7 +83,7 @@ namespace Internship_3_OOP_Calendar
                 $"Title: {e.Title} - Location: {e.Location} - " +
                 $"Ended {tsSince.ToString("%d")} days ago - " +
                 $"Length: {tsLength.ToString("%h")}h {tsLength.ToString("%m")}min\n" +
-                $"Atendees:"
+                $"Atended:"
                 );
             foreach (var person in people)
             {
@@ -87,7 +92,7 @@ namespace Internship_3_OOP_Calendar
                 if (person.CheckAttended(e.Id))
                     Console.WriteLine($"\t{person.FirstName} {person.LastName} : {person.Email}");
             }
-            Console.WriteLine("Non atendees:");
+            Console.WriteLine("Missing:");
             foreach (var person in people)
             {
                 if (!e.CheckIsInvited(person.Email))
@@ -134,22 +139,63 @@ namespace Internship_3_OOP_Calendar
         }
         #endregion
 
+        #region Data handling functions
+        /// <summary>
+        /// Tries to find an Event object given the id.
+        /// </summary>
+        /// <param name="id">Event id to search.</param>
+        /// <param name="events">Event collection to search from.</param>
+        /// <param name="output">Found event.</param>
+        /// <returns>Boolean indicating wether the lookup was successful.</returns>
+        static bool TryGetEvent(Guid id, List<Event> events, out Event output)
+        {
+            output = null;
+            foreach (var e in events)
+            {
+                if (e.Id == id)
+                {
+                    output = e;
+                    return true;
+                }
+            }
+            return false;
+        }
+        /// <summary>
+        /// Sets the person as missing from an event.
+        /// </summary>
+        /// <param name="id">Event id.</param>
+        /// <param name="people">Collection of all people.</param>
+        /// <param name="emails">Emails of people that missed a given event.</param>
+        static void MarkAsMissing(Guid id,List<Event> events, List<Person> people, string[] emails)
+        {
+            TryGetEvent(id, events, out Event e);
+
+            var invited = from i in e.Invited
+                          where emails.Contains(i)
+                          select i;
+
+            foreach (var person in people)
+                foreach (var email in emails)
+                {
+                    if (person.Email == email && invited.Contains(person.Email))
+                    {
+                        person.Missed(id);
+                    }
+                }
+            foreach(var person in people)
+            {
+                if(emails.Contains(person.Email) && !invited.Contains(person.Email))
+                {
+                    Console.WriteLine($"\t{person.Email} is not on the list of invited people!");
+                }
+            }
+        }
+        #endregion
         static void Main()
         {
             #region Predefined data
             List<Event> events = new()
             {
-                new Event("Fake active event #0",
-                "",
-                DateTime.UtcNow,
-                DateTime.UtcNow.AddHours(1),
-                new List<string>()
-                {
-                    "eldred.moor2@hotmail.com",
-                    "eunice2017@gmail.com",
-                    "kennedi_kli@gmail.com",
-                }
-                ),
                 new Event("e794943a-6a10-46a4-8d84-80f906ea9c6c",
                 "DUMP DESIGN #1",
                 "FESB",
@@ -235,7 +281,7 @@ namespace Internship_3_OOP_Calendar
                 new Person("Mary","Leroy","eldred.moor2@hotmail.com",
                 new()
                 {
-                    {Guid.Parse("e794943a-6a10-46a4-8d84-80f906ea9c6c"),true },
+                    {Guid.Parse("e794943a-6a10-46a4-8d84-80f906ea9c6c"),false },
                     {Guid.Parse("44bd33b8-01b9-45b0-9420-a209236fbcec"),true },
                 }),
                 new Person("Steven","Wick","eunice2017@gmail.com"),
@@ -278,6 +324,7 @@ namespace Internship_3_OOP_Calendar
                     case 1:
                         {
                             #region Active Events
+                            active:
                             Console.Clear();
                             WriteEvents(ActiveEvents(events), people, WriteStyleActive);
                             string[] activeEventsOptions =
@@ -294,7 +341,22 @@ namespace Internship_3_OOP_Calendar
                                     }
                                 case 1:
                                     {
-                                        // TODO Mark as missing submenu option
+                                        Console.Write("Input event id: ");
+                                        if(!Guid.TryParse(Console.ReadLine(),out Guid id)){
+                                            WriteWarning("Invalid id format!");
+                                            break;
+                                        }
+                                        if(!TryGetEvent(id,events,out _))
+                                        {
+                                            WriteWarning("Event with given id does not exist!");
+                                            break;
+                                        }
+                                        Console.WriteLine("Input emails of people to mark as missing," +
+                                            " separated with whitespace.");
+                                        Console.Write("Input here: ");
+                                        string[] emails = (Console.ReadLine().Split(' '));
+                                        MarkAsMissing(id,events,people,emails);
+                                        WaitForUser();
                                         break;
                                     }
                             }
@@ -305,7 +367,7 @@ namespace Internship_3_OOP_Calendar
                         {
                             #region Upcoming Events
                             Console.Clear();
-                            WriteEvents(UpcomingEvents(events),people, WriteStyleUpcoming);
+                            WriteEvents(UpcomingEvents(events), people, WriteStyleUpcoming);
                             string[] upcomingEventsOptions =
                             {
                                     "Return to main menu",
