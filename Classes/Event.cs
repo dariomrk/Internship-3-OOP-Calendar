@@ -6,7 +6,7 @@
     public class Event
     {
         #region Fields
-        public readonly Guid Id = Guid.NewGuid();
+        public readonly Guid Id;
         private readonly List<string> _invited;
         private string _title;
         private string _location;
@@ -68,6 +68,7 @@
         #region Constructors
         public Event(string title, string location, DateTime startAt, DateTime endAt)
         {
+            Id = Guid.NewGuid();
             Title = title;
             Location = location;
             StartDateTime = startAt;
@@ -76,6 +77,16 @@
         }
         public Event(string title, string location, DateTime startAt, DateTime endAt, List<string> invited)
         {
+            Id = Guid.NewGuid();
+            Title = title;
+            Location = location;
+            StartDateTime = startAt;
+            EndDateTime = endAt;
+            _invited = invited;
+        }
+        public Event(string id,string title, string location, DateTime startAt, DateTime endAt, List<string> invited)
+        {
+            Id = Guid.Parse(id);
             Title = title;
             Location = location;
             StartDateTime = startAt;
