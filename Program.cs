@@ -1,4 +1,7 @@
 ﻿using Internship_3_OOP_Calendar.Classes;
+using System.Globalization;
+using System.Text.RegularExpressions;
+
 namespace Internship_3_OOP_Calendar
 {
     public class Program
@@ -234,8 +237,8 @@ namespace Internship_3_OOP_Calendar
             TryGetEvent(id, events, out Event e);
 
             var toRemove = from i in e.Invited
-                          where emails.Contains(i)
-                          select i;
+                           where emails.Contains(i)
+                           select i;
 
             foreach (var i in toRemove)
             {
@@ -248,6 +251,22 @@ namespace Internship_3_OOP_Calendar
                 {
                     Console.WriteLine($"\t{person.Email} is not on the list of invited people!");
                 }
+            }
+        }
+        static DateTime InputDateTime()
+        {
+            try
+            {
+                DateTime parsed;
+                Console.Write("Input date and time in dd/MM/yyyy HH:m format: ");
+                string toParse = Console.ReadLine();
+                parsed = DateTime.ParseExact(toParse,"d/MM/yyyy HH:m",CultureInfo.InvariantCulture);
+                parsed.ToUniversalTime();
+                return parsed;
+            }
+            catch (Exception)
+            {
+                throw new("Invalid input format!");
             }
         }
         #endregion
@@ -519,7 +538,80 @@ namespace Internship_3_OOP_Calendar
                     case 4:
                         {
                             #region Create Event
-                            // TODO implement menu option
+                            string title, location;
+                            DateTime start, end;
+                            string[] invite;
+
+                            Console.Write("Please input the title of the event: ");
+                            title = Console.ReadLine();
+                            if (string.IsNullOrWhiteSpace(title))
+                            {
+                                WriteWarning("Title cannot be empty!");
+                                break;
+                            }
+                            Console.Write("Optionally input event location: ");
+                            location = Console.ReadLine();
+
+                            try
+                            {
+                                Console.WriteLine("Start:");
+                                start = InputDateTime();
+                                Console.WriteLine("End:");
+                                end = InputDateTime();
+
+                                if (start < DateTime.UtcNow)
+                                    throw new("Event start time must be in the future!");
+                                if (start > end)
+                                    throw new("End time must be after start time!");
+                            }
+                            catch (Exception err)
+                            {
+                                WriteWarning(err.Message);
+                                break;
+                            }
+                            Console.WriteLine("Input emails of people to invite," +
+                                          " separated with whitespace.");
+                            Console.Write("Input here: ");
+                            string[] emails = (Console.ReadLine().Split(' '));
+
+                            var invited = from p in people
+                                          where emails.Contains(p.Email)
+                                          select p;
+
+                            List<string> available = new();
+                            List<string> unavailable = new();
+
+                            foreach (var e in events)
+                            {
+                                foreach (var i in invited)
+                                {
+                                    // Overlap between the new event and an existing event
+                                    if(e.StartDateTime < end && start < e.EndDateTime)
+                                    {
+                                        if (e.Invited.Contains(i.Email))
+                                        {
+                                            unavailable.Add(i.Email);
+                                        }
+                                        else
+                                        {
+                                            available.Add(i.Email);
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (unavailable.Count > 0)
+                            {
+                                Console.WriteLine("Unavailable at the time:");
+                                foreach (var u in unavailable)
+                                {
+                                    Console.WriteLine("\t" + u);
+                                }
+                            }
+
+                            Event newEvent = new(title, location ?? "", start, end, available.ToList());
+                            events.Add(newEvent);
+                            WaitForUser();
                             break;
                             #endregion
                         }
