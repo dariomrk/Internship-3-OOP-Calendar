@@ -100,6 +100,10 @@
         {
             return _eventAttendance.ContainsKey(eventId);
         }
+        /// <summary>
+        /// Removes all info to a given event.
+        /// </summary>
+        /// <param name="eventId">Event identifier.</param>
         public void RemoveEventInfo(Guid eventId)
         {
             if (_eventAttendance.ContainsKey(eventId))

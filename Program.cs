@@ -104,7 +104,6 @@ namespace Internship_3_OOP_Calendar
                     Console.WriteLine($"\t{person.FirstName} {person.LastName} : {person.Email}");
             }
         }
-
         static void WaitForUser()
         {
             Console.WriteLine("Press any key to continue...");
@@ -168,7 +167,7 @@ namespace Internship_3_OOP_Calendar
         /// <summary>
         /// Tries to find an Event object given the id.
         /// </summary>
-        /// <param name="id">Event id to search.</param>
+        /// <param name="id">Event id to search for.</param>
         /// <param name="events">Event collection to search from.</param>
         /// <param name="output">Found event.</param>
         /// <returns>Boolean indicating wether the lookup was successful.</returns>
@@ -185,6 +184,13 @@ namespace Internship_3_OOP_Calendar
             }
             return false;
         }
+        /// <summary>
+        /// <inheritdoc cref="TryGetEvent(Guid, List{Event}, out Event)"/>
+        /// </summary>
+        /// <param name="stringId">Event id string to search for.</param>
+        /// <param name="events">Event collection to search from.</param>
+        /// <param name="output">Found event.</param>
+        /// <returns></returns>
         static bool TryGetEvent(string stringId, List<Event> events, out Event output)
         {
             output = null;
@@ -192,15 +198,7 @@ namespace Internship_3_OOP_Calendar
             {
                 return false;
             }
-            foreach (var e in events)
-            {
-                if (e.Id == id)
-                {
-                    output = e;
-                    return true;
-                }
-            }
-            return false;
+            return TryGetEvent(stringId, events, out output);
         }
         /// <summary>
         /// Sets the person as missing from an event.
@@ -232,6 +230,13 @@ namespace Internship_3_OOP_Calendar
                 }
             }
         }
+        /// <summary>
+        /// Removes an arbitrary number of invited people from a given event.
+        /// </summary>
+        /// <param name="id">Event id.</param>
+        /// <param name="events">Collection of events.</param>
+        /// <param name="people">Collection of all people.</param>
+        /// <param name="emails">Invited people to remove from given event.</param>
         static void RemoveInvited(Guid id, List<Event> events, List<Person> people, string[] emails)
         {
             TryGetEvent(id, events, out Event e);
@@ -253,6 +258,10 @@ namespace Internship_3_OOP_Calendar
                 }
             }
         }
+        /// <summary>
+        /// Wrapper function for DateTime.ParseExact
+        /// </summary>
+        /// <returns></returns>
         static DateTime InputDateTime()
         {
             try
